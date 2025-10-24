@@ -1,9 +1,10 @@
 # Proyecto: EcoBot Home Control - Asistente Inteligente de Hogar
-# Autor: [Ignacio]
+# Autor: Ignacio
 # Descripción: Sistema de control y monitoreo de consumo energético del hogar.
 
 import time
 from datetime import datetime
+import matplotlib.pyplot as plt  # 👈 Agregado para el gráfico
 
 # Tarifa eléctrica (colones por kWh en Costa Rica)
 TARIFA = 140  
@@ -32,7 +33,8 @@ def menu():
     print("4️⃣ Ver reporte de consumo")
     print("5️⃣ Recomendaciones ecológicas")
     print("6️⃣ Historial de actividades")
-    print("7️⃣ Salir\n")
+    print("7️⃣ Salir")
+    print("8️⃣ Ver gráfico de consumo\n")  # 👈 Nueva opción
 
 # Historial de acciones
 historial = []
@@ -94,6 +96,33 @@ def ver_historial():
     for fecha, accion in historial:
         print(f"{fecha.strftime('%d/%m %H:%M:%S')} → {accion}")
 
+# 👇 Nueva función: gráfico de consumo eléctrico
+def grafico_consumo():
+    eco_say("Creando gráfico de consumo por dispositivo...")
+    nombres = []
+    consumos = []
+
+    for nombre, datos in dispositivos.items():
+        consumo = datos["consumo"] * datos["horas"]
+        if consumo > 0:
+            nombres.append(nombre.capitalize())
+            consumos.append(consumo)
+
+    if not nombres:
+        eco_say("No hay datos de consumo para mostrar.")
+        return
+
+    plt.figure(figsize=(9, 5))
+    plt.bar(nombres, consumos)
+    plt.title("Consumo Eléctrico Diario por Dispositivo (kWh)")
+    plt.ylabel("kWh consumidos")
+    plt.xticks(rotation=30, ha='right')
+    plt.grid(axis='y', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    plt.show()
+
+    historial.append((datetime.now(), "Gráfico de consumo mostrado."))
+
 # Programa principal
 eco_say("Bienvenido a EcoBot Home Control 🏠")
 eco_say("Sistema listo para administrar tu hogar inteligente de manera ecológica.")
@@ -117,5 +146,7 @@ while True:
     elif opcion in ["7", "salir"]:
         eco_say("Guardando datos... apagando el sistema EcoBot. 🌎 Hasta pronto.")
         break
+    elif opcion in ["8", "grafico", "gráfico"]:
+        grafico_consumo()
     else:
         eco_say("Comando no reconocido. Intenta nuevamente.")

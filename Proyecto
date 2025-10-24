@@ -1,0 +1,121 @@
+# Proyecto: EcoBot Home Control - Asistente Inteligente de Hogar
+# Autor: [Ignacio]
+# Descripción: Sistema de control y monitoreo de consumo energético del hogar.
+
+import time
+from datetime import datetime
+
+# Tarifa eléctrica (colones por kWh en Costa Rica)
+TARIFA = 140  
+
+# Base de datos de dispositivos inteligentes
+dispositivos = {
+    "televisor": {"consumo": 0.12, "horas": 0, "estado": "apagado"},
+    "computadora": {"consumo": 0.25, "horas": 0, "estado": "apagado"},
+    "consola de videojuegos": {"consumo": 0.20, "horas": 0, "estado": "apagado"},
+    "luces inteligentes": {"consumo": 0.02, "horas": 0, "estado": "apagado"},
+    "lavadora inteligente": {"consumo": 0.80, "horas": 0, "estado": "apagado"},
+    "termostato inteligente": {"consumo": 0.30, "horas": 0, "estado": "apagado"},
+    "refrigeradora": {"consumo": 1.20, "horas": 24, "estado": "encendido"}
+}
+
+def eco_say(texto):
+    """Simula voz de asistente."""
+    print("EcoBot:", texto)
+    time.sleep(0.6)
+
+def menu():
+    print("\n===== 📡 MENÚ PRINCIPAL - ECOBOT HOME CONTROL =====")
+    print("1️⃣ Encender dispositivo")
+    print("2️⃣ Apagar dispositivo")
+    print("3️⃣ Registrar horas de uso")
+    print("4️⃣ Ver reporte de consumo")
+    print("5️⃣ Recomendaciones ecológicas")
+    print("6️⃣ Historial de actividades")
+    print("7️⃣ Salir\n")
+
+# Historial de acciones
+historial = []
+
+# Funciones principales
+def encender_dispositivo():
+    nombre = input("🔌 Dispositivo a encender: ").lower()
+    if nombre in dispositivos:
+        dispositivos[nombre]["estado"] = "encendido"
+        eco_say(f"{nombre.capitalize()} encendido correctamente.")
+        historial.append((datetime.now(), f"Encendido {nombre}"))
+    else:
+        eco_say("No encontré ese dispositivo.")
+
+def apagar_dispositivo():
+    nombre = input("💤 Dispositivo a apagar: ").lower()
+    if nombre in dispositivos:
+        dispositivos[nombre]["estado"] = "apagado"
+        eco_say(f"{nombre.capitalize()} apagado.")
+        historial.append((datetime.now(), f"Apagado {nombre}"))
+    else:
+        eco_say("No encontré ese dispositivo.")
+
+def registrar_horas():
+    eco_say("Registrando uso diario de dispositivos activos...")
+    for nombre, datos in dispositivos.items():
+        if datos["estado"] == "encendido":
+            horas = float(input(f"⏱️ ¿Cuántas horas al día usas el {nombre}? "))
+            dispositivos[nombre]["horas"] = horas
+    eco_say("Registro completado con éxito.")
+    historial.append((datetime.now(), "Registro de horas actualizado."))
+
+def reporte_consumo():
+    eco_say("Generando reporte de consumo energético...")
+    total_kwh = 0
+    for nombre, datos in dispositivos.items():
+        consumo = datos["consumo"] * datos["horas"]
+        costo = consumo * TARIFA
+        total_kwh += consumo
+        estado = datos["estado"]
+        print(f"{nombre.capitalize():25} {estado:10} {consumo:.2f} kWh | ₡{costo:.2f}")
+    print("\n⚙️ Total diario:", f"{total_kwh:.2f} kWh")
+    print("💰 Costo diario:", f"₡{total_kwh * TARIFA:.2f}")
+    print("💸 Costo mensual:", f"₡{total_kwh * TARIFA * 30:.2f}")
+    historial.append((datetime.now(), "Reporte de consumo generado."))
+
+def recomendaciones():
+    eco_say("Analizando hábitos de consumo...")
+    for nombre, datos in dispositivos.items():
+        if datos["estado"] == "encendido" and datos["horas"] > 5:
+            print(f"🔸 Reduce el uso del {nombre}, lo mantienes encendido demasiado tiempo.")
+        elif datos["consumo"] > 0.5 and datos["estado"] == "encendido":
+            print(f"🔹 El {nombre} tiene un alto consumo, apágalo cuando no lo uses.")
+    eco_say("Consejo: utiliza iluminación LED, desconecta consolas en modo reposo y ajusta el termostato entre 22-24°C.")
+    historial.append((datetime.now(), "Recomendaciones generadas."))
+
+def ver_historial():
+    eco_say("Mostrando registro de actividades del sistema...")
+    for fecha, accion in historial:
+        print(f"{fecha.strftime('%d/%m %H:%M:%S')} → {accion}")
+
+# Programa principal
+eco_say("Bienvenido a EcoBot Home Control 🏠")
+eco_say("Sistema listo para administrar tu hogar inteligente de manera ecológica.")
+
+while True:
+    menu()
+    opcion = input("Selecciona una opción: ").lower()
+
+    if opcion in ["1", "encender"]:
+        encender_dispositivo()
+    elif opcion in ["2", "apagar"]:
+        apagar_dispositivo()
+    elif opcion in ["3", "registrar"]:
+        registrar_horas()
+    elif opcion in ["4", "reporte"]:
+        reporte_consumo()
+    elif opcion in ["5", "recomendaciones"]:
+        recomendaciones()
+    elif opcion in ["6", "historial"]:
+        ver_historial()
+    elif opcion in ["7", "salir"]:
+        eco_say("Guardando datos... apagando el sistema EcoBot. 🌎 Hasta pronto.")
+        break
+    else:
+        eco_say("Comando no reconocido. Intenta nuevamente.")
